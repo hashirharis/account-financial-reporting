@@ -10,13 +10,17 @@
         OCA Financial Reports
     """,
     'author': 'Camptocamp SA,'
+              'initOS GmbH,'
               'Odoo Community Association (OCA)',
     'website': 'http://www.camptocamp.com',
     'depends': [
         'account',
+        # 'date_range',
     ],
     'data': [
         'wizard/ledger_report_wizard_view.xml',
+        'wizard/balance_common_wizard_view.xml',
+        'views/report_menus.xml',
     ],
     'test': [
     ],
