@@ -535,7 +535,8 @@ class MisReportInstancePeriod(models.Model):
             if current_periods:
                 all_periods = date_range_obj.search(
                     [('type_id', '=', self.date_range_type_id.id),
-                     ('company_id', '=', self.report_instance_id.company_id.id)],
+                     ('company_id', '=',
+                      self.report_instance_id.company_id.id)],
                     order='date_start')
                 all_period_ids = [p.id for p in all_periods]
                 p = all_period_ids.index(current_periods[0].id) + self.offset
@@ -628,7 +629,7 @@ class MisReportInstancePeriod(models.Model):
         if AEP.has_account_var(expr):
             aep = AEP(self.env)
             aep.parse_expr(expr)
-            aep.done_parsing()
+            aep.done_parsing(self.report_instance_id.company_id)
             domain = aep.get_aml_domain_for_expr(
                 expr,
                 self.date_from, self.date_to,
