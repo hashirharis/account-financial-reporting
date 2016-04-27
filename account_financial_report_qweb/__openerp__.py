@@ -20,6 +20,8 @@
     'data': [
         'wizard/ledger_report_wizard_view.xml',
         'wizard/balance_common_wizard_view.xml',
+        'wizard/partner_balance_wizard_view.xml',
+        'wizard/trial_balance_wizard_view.xml',
         'views/report_menus.xml',
     ],
     'test': [
