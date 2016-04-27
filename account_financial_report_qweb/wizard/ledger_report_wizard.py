@@ -11,7 +11,7 @@ class LedgerReportWizard(models.TransientModel):
     _description = "Ledger Report Wizard"
 
     company_id = fields.Many2one(comodel_name='res.company')
-    # date_range = ??
+    date_range_id = fields.Many2one(comodel_name='date.range', required=True)
     date_from = fields.Date()
     date_to = fields.Date()
     target_move = fields.Selection([('posted', 'All Posted Entries'),
@@ -88,3 +88,8 @@ class LedgerReportWizard(models.TransientModel):
             used_context,
             lang=self.env.context.get('lang', 'en_US'))
         return self._print_report(data)
+
+    @api.onchange('date_range_id')
+    def onchange_date_range_id(self):
+        self.date_from = self.date_range_id.date_start
+        self.date_to = self.date_range_id.date_end

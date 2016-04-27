@@ -14,14 +14,15 @@
     'website': 'http://www.camptocamp.com',
     'depends': [
         'account',
+        'date_range',
     ],
     'data': [
         'wizard/aged_partner_balance_wizard_view.xml',
         'wizard/general_ledger_wizard.xml',
         'wizard/open_invoice_wizard_view.xml',
+        'wizard/partner_ledger_wizard.xml',
         'menuitems.xml',
         'reports.xml',
-        # 'wizard/partner_ledger_wizard.xml',
         'report/templates/general_ledger.xml',
         'report/templates/open_invoice_report.xml'
     ],
