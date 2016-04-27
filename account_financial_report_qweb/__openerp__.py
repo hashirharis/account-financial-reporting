@@ -23,6 +23,7 @@
         'reports.xml',
         # 'wizard/partner_ledger_wizard.xml',
         'report/templates/general_ledger.xml',
+        'report/templates/open_invoice_report.xml'
     ],
     'test': [
     ],
