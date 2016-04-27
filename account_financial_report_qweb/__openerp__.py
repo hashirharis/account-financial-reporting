@@ -17,14 +17,14 @@
     ],
     'data': [
         'wizard/aged_partner_balance_wizard_view.xml',
-        'wizard/ledger_report_wizard_view.xml',
-        'report_menus.xml',
+        'wizard/general_ledger_wizard.xml',
+        'wizard/open_invoice_wizard_view.xml',
+        'menuitems.xml',
+        'reports.xml',
+        # 'wizard/partner_ledger_wizard.xml',
+        'report/templates/general_ledger.xml',
     ],
     'test': [
-    ],
-    'demo': [
-    ],
-    'qweb': [
     ],
     'installable': True,
     'application': True,
