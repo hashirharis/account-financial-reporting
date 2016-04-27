@@ -16,18 +16,14 @@
         'account',
     ],
     'data': [
-<<<<<<< 2ce8b69f6cdae37f067b275cc79e1894f142e110
         'wizard/aged_partner_balance_wizard_view.xml',
+        'wizard/general_ledger_wizard.xml',
         'wizard/ledger_report_wizard_view.xml',
         'wizard/open_invoice_wizard_view.xml',
-        'report_menus.xml',
-=======
         'menuitems.xml',
         'reports.xml',
-        'wizard/general_ledger_wizard.xml',
         # 'wizard/partner_ledger_wizard.xml',
-        'report/templates/ledger_general.xml',
->>>>>>> include work from Yannick on qweb ledger, rearrange
+        'report/templates/general_ledger.xml',
     ],
     'test': [
     ],
