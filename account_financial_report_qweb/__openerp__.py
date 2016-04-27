@@ -15,22 +15,22 @@
     'website': 'http://www.camptocamp.com',
     'depends': [
         'account',
-        # 'date_range',
+        'date_range',
     ],
     'data': [
-        'wizard/ledger_report_wizard_view.xml',
+        'wizard/aged_partner_balance_wizard_view.xml',
+        'wizard/general_ledger_wizard.xml',
+        'wizard/open_invoice_wizard_view.xml',
+        'wizard/partner_ledger_wizard.xml',
         'wizard/balance_common_wizard_view.xml',
-        'wizard/partner_balance_wizard_view.xml',
         'wizard/trial_balance_wizard_view.xml',
         'wizard/balance_sheet_wizard_view.xml',
-        #'wizard/profit_loss_wizard_view.xml',
-        'views/report_menus.xml',
+        'menuitems.xml',
+        'reports.xml',
+        'report/templates/general_ledger.xml',
+        'report/templates/open_invoice_report.xml'
     ],
     'test': [
-    ],
-    'demo': [
-    ],
-    'qweb': [
     ],
     'installable': True,
     'application': True,
