@@ -18,6 +18,7 @@
     'data': [
         'wizard/aged_partner_balance_wizard_view.xml',
         'wizard/ledger_report_wizard_view.xml',
+        'wizard/open_invoice_wizard_view.xml',
         'report_menus.xml',
     ],
     'test': [
