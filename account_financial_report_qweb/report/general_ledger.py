@@ -86,8 +86,10 @@ CREATE OR REPLACE VIEW %(report_name)s AS (
     LEFT JOIN account_move_line AS ml ON (ml.account_id = acc.id)
     INNER JOIN res_partner AS part ON (ml.partner_id = part.id)
     INNER JOIN account_move AS m ON (ml.move_id = m.id)
+    INNER JOIN account_account_type aat ON (acc.user_type_id = aat.id)
     LEFT JOIN account_invoice AS i ON (m.id = i.move_id)
     LEFT JOIN res_currency AS cur ON (ml.currency_id = cur.id)
+  WHERE ml.date >= %(fy_date)s OR aat.include_initial_balance = True
   WINDOW w_account AS (PARTITION BY acc.code ORDER BY ml.date, ml.id),
          w_account_centralized AS (
            PARTITION BY acc.code,
@@ -97,7 +99,8 @@ CREATE OR REPLACE VIEW %(report_name)s AS (
                         ml.partner_id
            ORDER BY ml.date, ml.journal_id, ml.id)
 )
-        """ % {'report_name': report_name}
+        """ % {'report_name': report_name,
+               'fy_date': fy_date}
         cr.execute(query)
 
 
