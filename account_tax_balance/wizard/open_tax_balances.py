@@ -14,10 +14,10 @@ class OpenTaxBalances(models.TransientModel):
     from_date = fields.Date('From date', required=True)
     to_date = fields.Date('To date', required=True)
     date_range_id = fields.Many2one('date.range', 'Date range')
-    move_state = fields.Selection(
-        [('draft', 'Unposted'), ('posted', 'Posted')],
-        string="Move state", required=True, default='posted'
-    )
+    target_move = fields.Selection([
+        ('posted', 'All Posted Entries'),
+        ('all', 'All Entries'),
+    ], 'Target Moves', required=True, default='posted')
 
     @api.onchange('date_range_id')
     def onchange_date_range_id(self):
@@ -30,19 +30,12 @@ class OpenTaxBalances(models.TransientModel):
     @api.multi
     def open_taxes(self):
         self.ensure_one()
-        view = self.env.ref('account_tax_balance.view_tax_tree_balance')
-        action = {
-            'name': _("Tax Balances"),
-            'res_model': 'account.tax',
-            'view_type': 'form',
-            'view_mode': 'tree',
-            'view_id': view.id,
-            'type': 'ir.actions.act_window',
-            'context': {
-                'from_date': self.from_date,
-                'to_date': self.to_date,
-                'move_state': self.move_state,
-                'company_id': self.company_id.id,
-            },
+        action = self.env.ref('account_tax_balance.action_tax_balances_tree')
+        vals = action.read()[0]
+        vals['context'] = {
+            'from_date': self.from_date,
+            'to_date': self.to_date,
+            'target_move': self.target_move,
+            'company_id': self.company_id.id,
         }
-        return action
+        return vals
