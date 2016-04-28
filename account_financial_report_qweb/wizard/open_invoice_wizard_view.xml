@@ -12,7 +12,6 @@
                     </group>
                     <group name="date_info">
                         <field name="at_date"/>
-                        <field name="until_date" />
                     </group>
                     <group name="partner_info">
                         <field name="partner_ids" />
@@ -43,11 +42,6 @@
             <field name="view_id" ref="open_invoice_report_wizard_view"/>
             <field name="target">new</field>
         </record>
-
-        <menuitem
-            parent="account.menu_finance_legal_statement"
-            action="action_open_invoice_report"
-            id="menu_invoice_report_wizard"/>
 
 </data>
 </openerp>
