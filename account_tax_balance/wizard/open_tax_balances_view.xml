@@ -11,7 +11,7 @@
                         <field name="date_range_id"/>
                         <field name="from_date"></field>
                         <field name="to_date"></field>
-                        <field name="move_state"></field>
+                        <field name="target_move"></field>
                     </group>
                     <footer>
                         <button string="Open Taxes" name="open_taxes" type="object" class="oe_highlight"/>

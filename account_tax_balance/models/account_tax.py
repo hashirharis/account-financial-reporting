@@ -19,26 +19,34 @@ class AccountTax(models.Model):
             to_date = fields.Date.context_today(self)
         else:
             to_date = self.env.context['to_date']
-        if not self.env.context.get('move_state'):
-            move_state = 'posted'
+        if not self.env.context.get('target_move'):
+            target_move = 'posted'
         else:
-            move_state = self.env.context['move_state']
+            target_move = self.env.context['target_move']
         if not self.env.context.get('company_id'):
             company_id = self.env.user.company_id.id
         else:
             company_id = self.env.context['company_id']
         for tax in self:
             tax.balance = tax.compute_balance(
-                from_date, to_date, company_id, move_state)
+                from_date, to_date, company_id, target_move)
 
-    def compute_balance(self, from_date, to_date, company_id, state="posted"):
+    def compute_balance(
+        self, from_date, to_date, company_id, target_move="posted"
+    ):
         self.ensure_one()
         move_line_model = self.env['account.move.line']
+        if target_move == 'posted':
+            state = ['posted']
+        elif target_move == 'all':
+            state = ['posted', 'draft']
+        else:
+            state = []
         move_lines = move_line_model.search([
             ('tax_line_id', '=', self.id),
             ('date', '<=', to_date),
             ('date', '>=', from_date),
-            ('move_id.state', '=', state),
+            ('move_id.state', 'in', state),
             ('company_id', '=', company_id),
         ])
         total = sum([l.balance for l in move_lines])
