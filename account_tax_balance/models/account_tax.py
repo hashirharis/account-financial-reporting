@@ -9,8 +9,10 @@ class AccountTax(models.Model):
     _inherit = 'account.tax'
 
     balance = fields.Float(string="Balance", compute="_compute_balance")
+    base_balance = fields.Float(
+        string="Base Balance", compute="_compute_balance")
 
-    def _compute_balance(self):
+    def get_context_values(self):
         if not self.env.context.get('from_date'):
             from_date = fields.Date.context_today(self)
         else:
@@ -27,27 +29,58 @@ class AccountTax(models.Model):
             company_id = self.env.user.company_id.id
         else:
             company_id = self.env.context['company_id']
+        return from_date, to_date, company_id, target_move
+
+    def _compute_balance(self):
+        from_date, to_date, company_id, target_move = self.get_context_values()
         for tax in self:
             tax.balance = tax.compute_balance(
                 from_date, to_date, company_id, target_move)
+            tax.base_balance = tax.compute_base_balance(
+                from_date, to_date, company_id, target_move)
 
-    def compute_balance(
-        self, from_date, to_date, company_id, target_move="posted"
-    ):
-        self.ensure_one()
-        move_line_model = self.env['account.move.line']
+    def get_target_state_list(self, target_move="posted"):
         if target_move == 'posted':
             state = ['posted']
         elif target_move == 'all':
             state = ['posted', 'draft']
         else:
             state = []
-        move_lines = move_line_model.search([
-            ('tax_line_id', '=', self.id),
+        return state
+
+    def get_move_line_domain(self, from_date, to_date, company_id):
+        return [
             ('date', '<=', to_date),
             ('date', '>=', from_date),
-            ('move_id.state', 'in', state),
             ('company_id', '=', company_id),
+        ]
+
+    def compute_balance(
+        self, from_date, to_date, company_id, target_move="posted"
+    ):
+        self.ensure_one()
+        move_line_model = self.env['account.move.line']
+        state_list = self.get_target_state_list(target_move)
+        domain = self.get_move_line_domain(from_date, to_date, company_id)
+        domain.extend([
+            ('move_id.state', 'in', state_list),
+            ('tax_line_id', '=', self.id),
         ])
+        move_lines = move_line_model.search(domain)
+        total = sum([l.balance for l in move_lines])
+        return total
+
+    def compute_base_balance(
+        self, from_date, to_date, company_id, target_move="posted"
+    ):
+        self.ensure_one()
+        move_line_model = self.env['account.move.line']
+        state_list = self.get_target_state_list(target_move)
+        domain = self.get_move_line_domain(from_date, to_date, company_id)
+        domain.extend([
+            ('move_id.state', 'in', state_list),
+            ('tax_ids', 'in', self.id),
+        ])
+        move_lines = move_line_model.search(domain)
         total = sum([l.balance for l in move_lines])
         return total
