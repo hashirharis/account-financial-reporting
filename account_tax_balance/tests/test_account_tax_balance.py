@@ -4,16 +4,13 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from openerp.tests.common import TransactionCase
- 
+
 
 class TestAccountTaxBalance(TransactionCase):
-    
-    def setUp(self): 
-        super(TestAccountTaxBalance, self).setUp()
 
     def test_tax_balance(self):
         tax_account_id = self.env['account.account'].search(
-                [('name', '=', 'Tax Paid')], limit=1).id
+            [('name', '=', 'Tax Paid')], limit=1).id
         tax = self.env['account.tax'].create({
             'name': 'Tax 10.0',
             'amount': 10.0,
@@ -21,9 +18,9 @@ class TestAccountTaxBalance(TransactionCase):
             'account_id': tax_account_id,
         })
         invoice_account_id = self.env['account.account'].search(
-                [('user_type_id', '=', self.env.ref(
-                    'account.data_account_type_receivable'
-                ).id)], limit=1).id
+            [('user_type_id', '=', self.env.ref(
+                'account.data_account_type_receivable'
+            ).id)], limit=1).id
         invoice_line_account_id = self.env['account.account'].search(
             [('user_type_id', '=', self.env.ref(
                 'account.data_account_type_expenses').id)], limit=1).id
@@ -54,10 +51,10 @@ class TestAccountTaxBalance(TransactionCase):
         }
         invoice.tax_line_ids = None
         self.env['account.invoice.tax'].create(tax_vals)
-        self.assertTrue((invoice.state == 'draft'))
+        self.assertEqual(invoice.state, 'draft')
 
         # change the state of invoice to open by clicking Validate button
         invoice.signal_workflow('invoice_open')
-       
+
         self.assertEquals(tax.base_balance, -100)
         self.assertEquals(tax.balance, -10)
