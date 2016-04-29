@@ -29,8 +29,6 @@
         'wizard/partner_ledger_wizard.xml',
         'wizard/balance_common_wizard_view.xml',
         'wizard/partner_balance_wizard_view.xml',
-        'wizard/trial_balance_wizard_view.xml',
-        'wizard/balance_sheet_wizard_view.xml',
         'menuitems.xml',
         'reports.xml',
         'report/templates/general_ledger.xml',
