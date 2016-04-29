@@ -12,13 +12,17 @@
     'author': 'Camptocamp SA,'
               'initOS GmbH,'
               'redCOR AG,'
+              'Akretion,'
               'Odoo Community Association (OCA)',
     'website': 'http://www.camptocamp.com',
     'depends': [
         'account',
         'date_range',
+        'mis_builder',
     ],
     'data': [
+        'views/chart_template_view.xml',
+        'views/account_view.xml',
         'wizard/aged_partner_balance_wizard_view.xml',
         'wizard/general_ledger_wizard.xml',
         'wizard/open_invoice_wizard_view.xml',
