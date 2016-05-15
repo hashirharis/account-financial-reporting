@@ -47,7 +47,7 @@
                         </div>
                         <div class="act_as_tbody">
                             <div class="act_as_row">
-                                <div class="act_as_cell first_column"><span t-esc="header['company']"/></div>
+                                <div class="act_as_cell first_column"><span t-esc="res_company.name"/></div>
                                 <div class="act_as_cell"><span t-esc="header['at_date']"/></div>
                                 <div class="act_as_cell"><span t-esc="header['account_filters']"/></div>
                                 <div class="act_as_cell"><span t-esc="header['target_moves']"/></div>
@@ -59,8 +59,6 @@
                     <t t-foreach="docs.read_group([('id', 'in', docs.ids)],['account_id'],['account_id'])" t-as="acc">
                         <t t-set="account"
                            t-value="account_obj.browse(acc['account_id'][0])"/>
-                        <t t-set="account_debit" t-value="0.0" />
-                        <t t-set="account_credit" t-value="0.0" />
                         <t t-set="account_balance" t-value="0.0" />
                         <div class="act_as_caption account_title">
                             <span t-esc="account.code"/> - <span
@@ -70,8 +68,6 @@
                         <t t-foreach="docs.read_group([('id', 'in', docs.ids), ('account_id', '=', account.id)],['partner_id'],['partner_id'])" t-as="part">
                             <t t-set="partner"
                                t-value="partner_obj.browse(part['partner_id'][0])"/>
-                            <t t-set="partner_debit" t-value="0.0" />
-                            <t t-set="partner_credit" t-value="0.0" />
                             <t t-set="partner_balance" t-value="0.0" />
                             <div class="act_as_caption account_title">
                                 <span t-esc="partner.name"/>
@@ -85,8 +81,6 @@
                                     <t t-set="currency_id"
                                        t-value="currency.id"/>
                                 </t>
-                                <t t-set="currency_debit" t-value="0.0" />
-                                <t t-set="currency_credit" t-value="0.0" />
                                 <t t-set="currency_balance" t-value="0.0" />
                                 <t t-set="currency_amount_balance" t-value="0.0"/>
                                 <t t-if="currency_id">
@@ -99,17 +93,13 @@
                                         <div class="act_as_row labels">
                                             <div class="act_as_cell first_column">Date</div>
                                             <div class="act_as_cell">Entry</div>
-                                            <div class="act_as_cell">Journal</div>
-                                            <div class="act_as_cell">Partner</div>
-                                            <div class="act_as_cell">Reference</div>
-                                            <div class="act_as_cell">Label</div>
+                                            <div class="act_as_cell">Invoice</div>
+                                            <div class="act_as_cell">Due Amount</div>
                                             <div class="act_as_cell">Due Date</div>
-                                            <div class="act_as_cell">Debit</div>
-                                            <div class="act_as_cell">Credit</div>
-                                            <div class="act_as_cell">Cum. Balance</div>
+                                            <div class="act_as_cell">Cum. Due Amount</div>
                                             <t t-if="curr['currency_id']">
-                                                <div class="act_as_cell">Curr. amount</div>
-                                                <div class="act_as_cell">Cum. Curr. Bal.</div>
+                                                <div class="act_as_cell">Due Curr. Amount</div>
+                                                <div class="act_as_cell">Cum. Due Curr. Amount</div>
                                             </t>
                                         </div>
                                     </div>
@@ -122,30 +112,20 @@
                                         <t t-foreach="moves" t-as="move">
                                             <div class="act_as_row">
                                                 <div class="act_as_cell first_column"><span t-esc="move.date"/></div>
-                                                <div
-                                                        class="act_as_cell"><span t-esc="move.move_id.name"/></div>
-                                                <div class="act_as_cell"><span t-esc="move.journal_id.code"/></div>
-                                                <div class="act_as_cell"><span t-esc="partner.name"/></div>
-                                                <div class="act_as_cell"><span
-                                                        t-esc="move.ref"/></div>
-                                                <div class="act_as_cell"><span
-                                                        t-esc="move.name"/>
-                                                    <t t-if="move.invoice_id"> - <span t-esc="move.invoice_id.number"/></t>
-                                                </div>
+                                                <div class="act_as_cell"><span t-esc="move.move_id.name"/></div>
+                                                <div class="act_as_cell"><t t-if="move.invoice_id"><span t-esc="move.invoice_id.number"/></t></div>
+                                                <div class="act_as_cell amount"><span t-esc="move.amount_residual_at_date" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/></div>
                                                 <div class="act_as_cell"><span t-esc="move.date_maturity"/></div>
-                                                <t t-set="account_debit" t-value="account_debit + move.debit" />
-                                                <t t-set="account_credit" t-value="account_credit + move.credit" />
-                                                <t t-set="account_balance" t-value="account_balance - move.credit + move.debit" />
-                                                <t t-set="partner_debit" t-value="partner_debit + move.debit" />
-                                                <t t-set="partner_credit" t-value="partner_credit + move.credit" />
-                                                <t t-set="partner_balance" t-value="partner_balance - move.credit + move.debit" />
-                                                <t t-set="currency_balance" t-value="currency_balance + move.amount_currency" />
-                                                <div class="act_as_cell amount"><span t-esc="move.debit"/></div>
-                                                <div class="act_as_cell amount"><span t-esc="move.credit"/></div>
-                                                <div class="act_as_cell amount"><span t-esc="partner_balance"/></div>
+                                                <t t-set="account_balance"
+                                                   t-value="account_balance + move.amount_residual_at_date" />
+                                                <t t-set="partner_balance"
+                                                   t-value="partner_balance + move.amount_residual_at_date" />
+                                                <t t-set="currency_balance"
+                                                   t-value="currency_balance + move.amount_residual_currency_at_date" />
+                                                <div class="act_as_cell amount"><span t-esc="partner_balance" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/></div>
                                                 <t t-if="currency_id">
-                                                    <div class="act_as_cell amount"><span t-esc="move.amount_currency"/></div>
-                                                    <div class="act_as_cell amount"><span t-esc="currency_balance"/></div>
+                                                    <div class="act_as_cell amount"><span t-esc="move.amount_residual_currency_at_date" t-esc-options='{"widget": "monetary", "display_currency": "currency"}'/></div>
+                                                    <div class="act_as_cell amount"><span t-esc="currency_balance" t-esc-options='{"widget": "monetary", "display_currency": "currency"}'/></div>
                                                 </t>
                                             </div>
                                         </t>
@@ -160,12 +140,8 @@
                                              <div class="act_as_cell"/>
                                              <div class="act_as_cell"/>
                                              <div class="act_as_cell"/>
-                                             <div class="act_as_cell"/>
-                                             <div class="act_as_cell"/>
-                                             <div class="act_as_cell"/>
-                                             <div class="act_as_cell"/>
                                              <div class="act_as_cell account_title"><span t-esc="currency.name"/> Total</div>
-                                             <div class="act_as_cell amount"><strong><span t-esc="currency_balance" /></strong></div>
+                                             <div class="act_as_cell amount"><strong><span t-esc="currency_balance" t-esc-options='{"widget": "monetary", "display_currency": "currency"}'/></strong></div>
                                         </div>
                                     </div>
                                 </t>
@@ -176,12 +152,8 @@
                                      <div class="act_as_cell"/>
                                      <div class="act_as_cell"/>
                                      <div class="act_as_cell"/>
-                                     <div class="act_as_cell"/>
-                                     <div class="act_as_cell"/>
-                                     <div class="act_as_cell account_title"><span t-esc="partner.name"/> Total</div>
-                                     <div class="act_as_cell amount"><strong><span t-esc="partner_debit" /></strong></div>
-                                     <div class="act_as_cell amount"><strong><span t-esc="partner_credit" /></strong></div>
-                                     <div class="act_as_cell amount"><strong><span t-esc="partner_balance" /></strong></div>
+                                     <div class="act_as_cell account_title">Total <span t-esc="partner.name"/></div>
+                                     <div class="act_as_cell amount"><strong><span t-esc="partner_balance" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/></strong></div>
                                 </div>
                             </div>
                         </t>
@@ -191,12 +163,8 @@
                                 <div class="act_as_cell"/>
                                 <div class="act_as_cell"/>
                                 <div class="act_as_cell"/>
-                                <div class="act_as_cell"/>
-                                <div class="act_as_cell"/>
-                                <div class="act_as_cell account_title"><span t-esc="account.name"/> Total</div>
-                                <div class="act_as_cell amount"><span t-esc="account_debit" /></div>
-                                <div class="act_as_cell amount"><span t-esc="account_credit" /></div>
-                                <div class="act_as_cell amount"><span t-esc="account_balance" /></div>
+                                <div class="act_as_cell account_title">Total <span t-esc="account.name"/></div>
+                                <div class="act_as_cell amount"><span t-esc="account_balance" t-esc-options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/></div>
                             </div>
                         </div>
                     </t>
