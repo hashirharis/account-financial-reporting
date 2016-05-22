@@ -40,17 +40,7 @@ class TestAccountTaxBalance(TransactionCase):
             'invoice_line_tax_ids': [(6, 0, [tax.id])],
         })
         invoice._onchange_invoice_line_ids()
-        # save new() values to DB
-        tax_vals = {
-            'name': invoice.tax_line_ids.name,
-            'amount': invoice.tax_line_ids.amount,
-            'account_id': invoice.tax_line_ids.account_id.id,
-            'invoice_id': invoice.id,
-            'tax_id': invoice.tax_line_ids.tax_id.id,
-            'manual': 1,
-        }
-        invoice.tax_line_ids = None
-        self.env['account.invoice.tax'].create(tax_vals)
+        invoice._convert_to_write(invoice._cache)
         self.assertEqual(invoice.state, 'draft')
 
         # change the state of invoice to open by clicking Validate button
