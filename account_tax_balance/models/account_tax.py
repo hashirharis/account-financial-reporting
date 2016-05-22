@@ -13,23 +13,13 @@ class AccountTax(models.Model):
         string="Base Balance", compute="_compute_balance")
 
     def get_context_values(self):
-        if not self.env.context.get('from_date'):
-            from_date = fields.Date.context_today(self)
-        else:
-            from_date = self.env.context['from_date']
-        if not self.env.context.get('to_date'):
-            to_date = fields.Date.context_today(self)
-        else:
-            to_date = self.env.context['to_date']
-        if not self.env.context.get('target_move'):
-            target_move = 'posted'
-        else:
-            target_move = self.env.context['target_move']
-        if not self.env.context.get('company_id'):
-            company_id = self.env.user.company_id.id
-        else:
-            company_id = self.env.context['company_id']
-        return from_date, to_date, company_id, target_move
+        context = self.env.context
+        return (
+            context.get('from_date', fields.Date.context_today(self)),
+            context.get('to_date', fields.Date.context_today(self)),
+            context.get('company_id', self.env.user.company_id.id),
+            context.get('target_move', 'posted')
+        )
 
     def _compute_balance(self):
         from_date, to_date, company_id, target_move = self.get_context_values()
