@@ -25,9 +25,10 @@ class AccountTax(models.Model):
         from_date, to_date, company_id, target_move = self.get_context_values()
         for tax in self:
             tax.balance = tax.compute_balance(
-                from_date, to_date, company_id, target_move)
-            tax.base_balance = tax.compute_base_balance(
-                from_date, to_date, company_id, target_move)
+                from_date, to_date, company_id, target_move, tax_or_base='tax')
+            tax.base_balance = tax.compute_balance(
+                from_date, to_date, company_id, target_move,
+                tax_or_base='base')
 
     def get_target_state_list(self, target_move="posted"):
         if target_move == 'posted':
@@ -46,31 +47,31 @@ class AccountTax(models.Model):
         ]
 
     def compute_balance(
-        self, from_date, to_date, company_id, target_move="posted"
+        self, from_date, to_date, company_id, target_move="posted",
+        tax_or_base='tax'
     ):
         self.ensure_one()
         move_line_model = self.env['account.move.line']
         state_list = self.get_target_state_list(target_move)
         domain = self.get_move_line_domain(from_date, to_date, company_id)
-        domain.extend([
-            ('move_id.state', 'in', state_list),
-            ('tax_line_id', '=', self.id),
-        ])
+        balance_domain = []
+        if tax_or_base == 'tax':
+            balance_domain = self.get_balance_domain(state_list)
+        elif tax_or_base == 'base':
+            balance_domain = self.get_base_balance_domain(state_list)
+        domain.extend(balance_domain)
         move_lines = move_line_model.search(domain)
         total = sum([l.balance for l in move_lines])
         return total
 
-    def compute_base_balance(
-        self, from_date, to_date, company_id, target_move="posted"
-    ):
-        self.ensure_one()
-        move_line_model = self.env['account.move.line']
-        state_list = self.get_target_state_list(target_move)
-        domain = self.get_move_line_domain(from_date, to_date, company_id)
-        domain.extend([
+    def get_balance_domain(self, state_list):
+        return [
+            ('move_id.state', 'in', state_list),
+            ('tax_line_id', '=', self.id),
+        ]
+
+    def get_base_balance_domain(self, state_list):
+        return [
             ('move_id.state', 'in', state_list),
             ('tax_ids', 'in', self.id),
-        ])
-        move_lines = move_line_model.search(domain)
-        total = sum([l.balance for l in move_lines])
-        return total
+        ]
