@@ -16,7 +16,7 @@ Accounting --> Reporting --> Open Tax Balances
 
 Select the company, the date range, the target moves and 'open taxes'
 
-.. image:: /account_tax_balance/images/tax_balance.png
+.. figure:: /account_tax_balance/static/description/tax_balance.png
 
 .. image:: https://odoo-community.org/website/image/ir.attachment/5784_f2813bd/datas
    :alt: Try me on Runbot
