@@ -2,7 +2,7 @@
 # © 2016 Lorenzo Battistini - Agile Business Group
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import models, fields
+from openerp import models, fields, api
 
 
 class AccountTax(models.Model):
@@ -22,13 +22,9 @@ class AccountTax(models.Model):
         )
 
     def _compute_balance(self):
-        from_date, to_date, company_id, target_move = self.get_context_values()
         for tax in self:
-            tax.balance = tax.compute_balance(
-                from_date, to_date, company_id, target_move, tax_or_base='tax')
-            tax.base_balance = tax.compute_balance(
-                from_date, to_date, company_id, target_move,
-                tax_or_base='base')
+            tax.balance = tax.compute_balance(tax_or_base='tax')
+            tax.base_balance = tax.compute_balance(tax_or_base='base')
 
     def get_target_state_list(self, target_move="posted"):
         if target_move == 'posted':
@@ -39,28 +35,16 @@ class AccountTax(models.Model):
             state = []
         return state
 
-    def get_move_line_domain(self, from_date, to_date, company_id):
+    def get_move_line_partial_domain(self, from_date, to_date, company_id):
         return [
             ('date', '<=', to_date),
             ('date', '>=', from_date),
             ('company_id', '=', company_id),
         ]
 
-    def compute_balance(
-        self, from_date, to_date, company_id, target_move="posted",
-        tax_or_base='tax'
-    ):
+    def compute_balance(self, tax_or_base='tax'):
         self.ensure_one()
-        move_line_model = self.env['account.move.line']
-        state_list = self.get_target_state_list(target_move)
-        domain = self.get_move_line_domain(from_date, to_date, company_id)
-        balance_domain = []
-        if tax_or_base == 'tax':
-            balance_domain = self.get_balance_domain(state_list)
-        elif tax_or_base == 'base':
-            balance_domain = self.get_base_balance_domain(state_list)
-        domain.extend(balance_domain)
-        move_lines = move_line_model.search(domain)
+        move_lines = self.get_move_lines_domain(tax_or_base=tax_or_base)
         total = sum([l.balance for l in move_lines])
         return total
 
@@ -75,3 +59,36 @@ class AccountTax(models.Model):
             ('move_id.state', 'in', state_list),
             ('tax_ids', 'in', self.id),
         ]
+
+    def get_move_lines_domain(self, tax_or_base='tax'):
+        move_line_model = self.env['account.move.line']
+        from_date, to_date, company_id, target_move = self.get_context_values()
+        state_list = self.get_target_state_list(target_move)
+        domain = self.get_move_line_partial_domain(
+            from_date, to_date, company_id)
+        balance_domain = []
+        if tax_or_base == 'tax':
+            balance_domain = self.get_balance_domain(state_list)
+        elif tax_or_base == 'base':
+            balance_domain = self.get_base_balance_domain(state_list)
+        domain.extend(balance_domain)
+        return move_line_model.search(domain)
+
+    def get_lines_action(self, tax_or_base='tax'):
+        move_lines = self.get_move_lines_domain(tax_or_base=tax_or_base)
+        move_line_ids = [l.id for l in move_lines]
+        action = self.env.ref('account.action_account_moves_all_tree')
+        vals = action.read()[0]
+        vals['context'] = {}
+        vals['domain'] = [('id', 'in', move_line_ids)]
+        return vals
+
+    @api.multi
+    def view_tax_lines(self):
+        self.ensure_one()
+        return self.get_lines_action(tax_or_base='tax')
+
+    @api.multi
+    def view_base_lines(self):
+        self.ensure_one()
+        return self.get_lines_action(tax_or_base='base')
